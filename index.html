@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>PENTEST AI - Intelligence Dashboard v2.0</title>
+    <style>
+        body {
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.08;
+            z-index: -1;
+        }
+        .glass {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        }
+        .terminal {
+            background: #000;
+            color: #10b981;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid #06b6d4;
+        }
+        .risk-circle {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            border: 4px solid rgba(255,255,255,0.1);
+            background: #0f172a;
+        }
+    </style>
+</head>
+<body>
+    <div class="p-6">
+        <div class="mesh-bg"></div>
+        <div class="max-w-5xl mx-auto">
+            <!-- HEADER -->
+            <div class="flex items-center justify-between mb-10 glass p-6 rounded-3xl">
+                <div class="flex items-center gap-5">
+                    <div class="w-16 h-16 rounded-2xl bg-cyan-500 flex items-center justify-center overflow-hidden shadow-lg">
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Security&backgroundColor=06b6d4" />
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text">PENTEST AI</h1>
+                        <p class="text-xs text-cyan-300 tracking-widest font-bold uppercase">Intelligence Dashboard v2.0</p>
+                    </div>
+                </div>
+                <div class="text-right hidden md:block">
+                    <p class="text-slate-400 text-sm">System Status</p>
+                    <p class="text-emerald-400 font-bold">Online</p>
+                </div>
+            </div>
+            <!-- INPUT -->
+            <div class="glass p-8 rounded-3xl mb-8">
+                <label class="block text-sm font-bold text-slate-400 mb-2 uppercase ml-1">Target Analysis Domain</label>
+                <div class="flex gap-4">
+                    <input id="targetUrl" class="flex-grow bg-slate-900/50 p-4 rounded-2xl border border-slate-700 outline-none focus:border-cyan-500 transition-all text-cyan-100" placeholder="example.com" />
+                    <button id="scanBtn" class="bg-cyan-600 hover:bg-cyan-500 px-10 py-4 rounded-2xl font-bold transition-all shadow-lg">ANALYZE NOW</button>
+                </div>
+            </div>
+            <!-- TERMINAL -->
+            <div id="terminal" class="terminal p-6 rounded-3xl mb-8 hidden shadow-2xl"></div>
+            <!-- RESULTS -->
+            <div id="results" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- SAFETY SCORE -->
+                    <div class="glass p-8 rounded-3xl flex flex-col items-center justify-center text-center">
+                        <p class="text-slate-400 text-sm mb-4 font-bold uppercase">Safety Score</p>
+                        <div id="riskCircle" class="risk-circle">0</div>
+                        <p id="riskLevel" class="mt-3 text-lg font-bold"></p>
+                    </div>
+                    <!-- DETAILS -->
+                    <div class="md:col-span-2 glass p-8 rounded-3xl">
+                        <h2 id="resTarget" class="text-2xl font-bold mb-4 text-cyan-400"></h2>
+                        <div class="space-y-3">
+                            <div class="flex justify-between border-b border-slate-700 pb-2">
+                                <span class="text-slate-400">SSL Connection</span>
+                                <span id="resSSL" class="font-bold"></span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-700 pb-2">
+                                <span class="text-slate-400">Active Entry Ports</span>
+                                <span id="resPorts" class="font-bold text-cyan-300"></span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-700 pb-2">
+                                <span class="text-slate-400">IP Address</span>
+                                <span id="resIP" class="font-bold text-cyan-300"></span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-700 pb-2">
+                                <span class="text-slate-400">Server Country</span>
+                                <span id="resCountry" class="font-bold text-cyan-300"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- VULNERABILITIES -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-2 h-8 bg-red-500 rounded-full"></div>
+                        <h3 class="text-xl font-bold">Vulnerabilities</h3>
+                    </div>
+                    <ul id="vulnList" class="space-y-3 text-slate-300"></ul>
+                </div>
+                <!-- RECOMMENDATIONS -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-2 h-8 bg-yellow-500 rounded-full"></div>
+                        <h3 class="text-xl font-bold">Threat Mitigation Plan</h3>
+                    </div>
+                    <ul id="recoList" class="space-y-3 text-slate-300"></ul>
+                </div>
+                <!-- STRENGTHS -->
+                <div class="glass p-8 rounded-3xl">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-2 h-8 bg-green-500 rounded-full"></div>
+                        <h3 class="text-xl font-bold">Security Strengths</h3>
+                    </div>
+                    <ul id="strengthList" class="space-y-3 text-slate-300"></ul>
+                </div>
+                <button id="downloadBtn" onclick="downloadPDF()" disabled class="w-full bg-slate-100 text-slate-900 hover:bg-white p-5 rounded-3xl font-black uppercase tracking-widest transition-all shadow-xl">Generate Official Forensic Report</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const btn = document.getElementById('scanBtn');
+        const term = document.getElementById('terminal');
+        let lastData = null;
+        async function typeTerminal(text) {
+            term.classList.remove('hidden');
+            term.innerHTML += `<span class="text-cyan-500">${text}</span><br>`;
+            term.scrollTop = term.scrollHeight;
+        }
+        btn.onclick = async () => {
+            const url = document.getElementById('targetUrl').value;
+            if(!url) return;
+            term.innerHTML = '';
+            document.getElementById('results').classList.add('hidden');
+            btn.innerText = 'SCANNING...';
+            btn.disabled = true;
+            await typeTerminal('Establishing Neural Connection...');
+            await new Promise(r => setTimeout(r, 600));
+            await typeTerminal('Intercepting SSL Handshake...');
+            await new Promise(r => setTimeout(r, 600));
+            await typeTerminal('Scanning Network Topology...');
+            await new Promise(r => setTimeout(r, 600));
+            await typeTerminal('Compiling Vulnerability Data...');
+            let data;
+            try {
+                const response = await fetch('/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                if (!response.ok) {
+                    const err = await response.json().catch(() => 'Scan failed');
+                    await typeTerminal(`Scan failed: ${err.error || response.statusText}`);
+                    btn.innerText = 'ANALYZE NOW';
+                    btn.disabled = false;
+                    return;
+                }
+                data = await response.json();
+            } catch (e) {
+                await typeTerminal('Network or server error during scan.');
+                btn.innerText = 'ANALYZE NOW';
+                btn.disabled = false;
+                return;
+            }
+            data = lastData = data;
+            updateDownloadState();
+            await typeTerminal('Scan Successful. Generating Results.');
+            setTimeout(() => displayResults(data), 500);
+            btn.innerText = 'ANALYZE NOW';
+            btn.disabled = false;
+        };
+        function displayResults(data) {
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('resTarget').innerText = data.target;
+            document.getElementById('resSSL').innerText = data.ssl_status + ' (' + data.days + ' remaining)';
+            document.getElementById('resPorts').innerText = data.open_ports.join(', ') || 'Secure - No Common Ports';
+            document.getElementById('resIP').innerText = data.geoip.ip;
+            document.getElementById('resCountry').innerText = data.geoip.country;
+            const circle = document.getElementById('riskCircle');
+            circle.innerText = data.score;
+            const color = data.score < 30 ? 'ef4444' : data.score < 70 ? 'f59e0b' : '10b981';
+            circle.style.borderColor = '#' + color;
+            circle.style.color = '#' + color;
+            document.getElementById('riskLevel').innerText = data.risk + ' RISK';
+            document.getElementById('riskLevel').style.color = '#' + color;
+            document.getElementById('vulnList').innerHTML = data.vulnerabilities.map(v => `<li>• ${v}</li>`).join('');
+            document.getElementById('recoList').innerHTML = data.recommendations.map(r => `<li>• ${r}</li>`).join('');
+            document.getElementById('strengthList').innerHTML = data.strengths.map(s => `<li>• ${s}</li>`).join('');
+        }
+        async function downloadPDF() {
+            if(!lastData) return alert('No report available. Run a scan first.');
+            try {
+                const res = await fetch('/download-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(lastData)
+                });
+                if(!res.ok) return alert('Failed to generate PDF');
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Report${lastData.target}.pdf`;
+                a.click();
+            } catch (e) {
+                alert('Error downloading PDF: ' + e.message);
+            }
+        }
+        const downloadBtn = document.getElementById('downloadBtn');
+        function updateDownloadState() {
+            if(lastData) {
+                downloadBtn.removeAttribute('disabled');
+            } else {
+                downloadBtn.setAttribute('disabled', 'disabled');
+            }
+        }
+    </script>
+</body>
+</html>
